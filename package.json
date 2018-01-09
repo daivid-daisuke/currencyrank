@@ -1,0 +1,12 @@
+{
+  "name": "currency-rank-log",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^1.7.10"
+  }
+}

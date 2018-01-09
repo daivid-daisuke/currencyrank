@@ -1,0 +1,161 @@
+<!doctype html>
+
+<div style="text-align: right; font-family: sans-serif;">
+  Last updated at:
+  <span id="last-updated-at"></span>
+  <img src="../assets/images/refresh.svg" onclick="___refresh()" style="cursor: pointer; vertical-align: middle;">
+</div>
+
+<table>
+  <tr>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="nxt"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="qash"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="dragonchain"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="reddcoin"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="experience-points"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="kin"></div></td>
+  </tr>
+
+  <tr>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="cindicator"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="attention-token-of-media"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="mooncoin"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="mintcoin"></div></td>
+  </tr>
+
+  <tr>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="life"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="dimecoin"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="dentacoin"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="stronghands"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="1337coin"></div></td>
+    <td><div class="coinmarketcap-currency-widget" data-base="USD" data-secondary="BTC" data-currency="stronghands"></div></td>
+  </tr>
+</table>
+
+<script type="text/template" id="coinmarketcap-currency-widget-content">
+  <div style="border: 2px solid #E4E6EB; border-radius: 10px; font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; min-width: 285px; white-space: nowrap;">
+    <div style="display: flex;">
+      <div style="text-align: center; padding: 5px 0px; width: 33%;">
+        <img src="https://files.coinmarketcap.com/static/img/coins/64x64/{{id}}.png">
+      </div>
+      <div style="border: 0px solid #000; text-align:left; padding:5px 0px; line-height: 25px;">
+        <a href="http://coinmarketcap.com/currencies/{{id}}/?utm_medium=widget&utm_campaign=cmcwidget&utm_source=&utm_content={{id}}"
+          target="_blank" style="display: block; font-size: 18px; text-decoration: none; color: rgb(66, 139, 202);"
+        >
+          {{name}} ({{symbol}})
+        </a>
+        <div style="font-size: 16px;">
+          {{price_}} {{BASE}}
+          <span style="color: {{percent_change_24h_color}}">({{percent_change_24h}}%)</span>
+        </div>
+        <span style="font-size: 12px; color: gray">{{price_btc}} BTC </span>
+      </div>
+    </div>
+    <div style="border-top: 1px solid #E4E6EB; display: flex;">
+      <div style="text-align: center; width:33%; font-size: 12px; padding: 12px 0; border-right: 1px solid #E4E6EB; line-height: 1.25em;">
+        RANK<br><br>
+        <span style="font-size: 17px;">{{rank}}</span>
+      </div>
+      <div style="text-align: center; width: 33%; font-size: 12px; padding: 12px 0 16px 0; border-right: 1px solid #E4E6EB; line-height: 1.25em;">
+        MARKET CAP<br><br>
+        <span style="font-size: 14px;">{{market_cap_}}
+          <span style="font-size:9px">{{BASE}}</span>
+        </span>
+      </div>
+      <div style="text-align: center; width:33%; font-size:12px; padding:12px 0 16px 0; line-height: 1.25em;">
+        VOLUME (24H)<br><br>
+        <span style="font-size: 14px; ">{{24h_volume_}}
+          <span style="font-size:9px">{{BASE}}</span>
+        </span>
+      </div>
+    </div>
+    <div style="border-top: 1px solid #E4E6EB;text-align:center;font-size:10px;font-style:italic;padding:5px 0;">
+      <a href="http://coinmarketcap.com?utm_medium=widget&amp;utm_campaign=cmcwidget&amp;utm_source=&amp;utm_content={{id}}" target="_blank"
+        style="text-decoration: none; color: rgb(66, 139, 202);">Powered by CoinMarketCap</a>
+    </div>
+  </div>
+</script>
+
+<script>
+{
+  let refreshTimerId
+  const refreshIntervalInMilliseconds = 5 * /*60 * 60 **/ 1000
+  const template = document.querySelector('#coinmarketcap-currency-widget-content').innerHTML
+  const tickerUrl = (currency, BASE) => `https://widgets.coinmarketcap.com/v1/ticker/${currency}/?ref=widget&convert=${BASE}`
+  window.___refresh = () => {
+    Promise
+      .all(Array.prototype.map.call(document.querySelectorAll('.coinmarketcap-currency-widget'), widget => {
+        const BASE = widget.getAttribute('data-base')
+        const base = BASE.toLowerCase()
+        return fetch(tickerUrl(widget.getAttribute('data-currency'), BASE))
+          .then(response => response.text().then(payload => ({ response, payload })))
+          .then(({ response, payload }) => {
+            if (!response.ok) {
+              throw new Error(JSON.stringify({
+                status:     response.status,
+                statusText: response.statusText,
+                payload,
+              }))
+            } else if (!payload) {
+              throw new Error('Response body is empty.')
+            } else {
+              return JSON.parse(payload)[0]
+            }
+          })
+          .then(ticker => Object.assign(ticker, {
+            BASE,
+            price_:         ticker[`price_${base}`],
+            market_cap_:    formatNumber(ticker[`market_cap_${base}`], 2),
+            '24h_volume_':  formatNumber(ticker[`24h_volume_${base}`], 2),
+            percent_change_24h_color: ticker.percent_change_24h >= 0 ? '#093' : '#d14836',
+          }))
+          .then(ticker => {
+            widget.innerHTML = template.replace(/\{\{(.+?)}}/g, (_, field) => ticker[field])
+            return ticker
+          })
+      }))
+      .then(tickers => {
+        const now = new Date()
+        const nowAsString = `${padZero(now.getFullYear())}-${padZero(now.getMonth() + 1)}-${padZero(now.getDate())} ${padZero(now.getHours())}:${padZero(now.getMinutes())}:${padZero(now.getSeconds())}`
+        document.querySelector('#last-updated-at').textContent = nowAsString
+        saveRanksAsTextFile(tickers, nowAsString)
+      })
+      .catch(error => alert(error))
+      .then(() => {
+        clearTimeout(refreshTimerId)
+        refreshTimerId = setTimeout(___refresh, refreshIntervalInMilliseconds)
+      })
+
+    function formatNumber(t, e) {
+      e = Math.pow(10, e);
+      for (var a = ["K", "M", "B", "T"], i = a.length - 1; i >= 0; i--) {
+        var r = Math.pow(10, 3 * (i + 1));
+        if (r <= t) {
+          1e3 == (t = Math.round(t * e / r) / e) && i < a.length - 1 && (t = 1, i++), t += " " + a[i];
+          break
+        }
+      }
+      return t
+    }
+
+    function saveRanksAsTextFile(tickers, nowAsString) {
+      const fs = require('fs')
+      const filePath = './ranks.tsv'
+      const content = [nowAsString, ...tickers.map(ticker => ticker.rank)].join('\t') + '\r\n'
+      if (fs.existsSync(filePath)) {
+        fs.appendFileSync(filePath, content)
+      } else {
+        const headers = ['datetime', ...tickers.map(ticker => ticker.name)].join('\t') + '\r\n'
+        fs.writeFileSync(filePath, headers + content)
+      }
+    }
+
+    function padZero(n) {
+      return n < 10 ? '0' + n : String(n)
+    }
+  }
+
+  ___refresh()
+}
+</script>
