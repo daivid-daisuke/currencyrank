@@ -80,7 +80,7 @@
 <script>
 {
   let refreshTimerId
-  const refreshIntervalInMilliseconds = 5 * /*60 * 60 **/ 1000
+  const refreshIntervalInMilliseconds = 5 * 60 * 60 * 1000
   const template = document.querySelector('#coinmarketcap-currency-widget-content').innerHTML
   const tickerUrl = (currency, BASE) => `https://widgets.coinmarketcap.com/v1/ticker/${currency}/?ref=widget&convert=${BASE}`
   window.___refresh = () => {
